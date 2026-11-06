@@ -2,572 +2,236 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Sistema POS Cafetería Donny Fun</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DonnyFun POS</title>
   <style>
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --border: #e2e8f0;
+      --success: #10b981;
+      --danger: #ef4444;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 1rem; }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .status-badge {
+      font-size: 0.85rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      background-color: #d1fae5;
+      color: #065f46;
+      font-weight: 600;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border: 1px solid var(--border);
+    }
+
+    h2 { font-size: 1.25rem; margin-bottom: 1rem; }
+
+    .form-group { margin-bottom: 1rem; }
+    label { display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.25rem; }
+    input, select {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 0.375rem;
+      font-size: 1rem;
+    }
+
+    button {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.625rem 1.25rem;
+      border-radius: 0.375rem;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.2s;
+    }
+
+    button:hover { background-color: var(--primary-hover); }
+
+    .order-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .order-item:last-child { border-bottom: none; }
+
+    .order-status {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 0.25rem;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+
+    .status-pendiente { background: #fef3c7; color: #92400e; }
+    .status-listo { background: #d1fae5; color: #065f46; }
   </style>
 </head>
-<body class="bg-amber-50 font-sans text-stone-800 antialiased selection:bg-amber-200">
-  <div id="app" class="flex flex-col lg:flex-row h-screen overflow-hidden">
-    
-    <!-- Barra de Navegación / Menú Lateral -->
-    <aside class="w-full lg:w-64 bg-stone-900 text-stone-100 flex flex-row lg:flex-col justify-between shadow-xl z-20 shrink-0">
-      <div class="flex lg:flex-col items-center lg:items-stretch w-full justify-between lg:justify-start">
-        <div class="p-3 lg:p-5 flex items-center gap-3 border-b-0 lg:border-b border-stone-800">
-          <div id="brand-logo-container" class="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-amber-600 flex items-center justify-center overflow-hidden shrink-0 border-2 border-amber-400">
-            <i id="brand-icon-default" class="fas fa-coffee text-white text-lg lg:text-xl"></i>
-            <img id="brand-logo-img" class="w-full h-full object-cover hidden" alt="Logo">
-          </div>
-          <div class="overflow-hidden hidden sm:block">
-            <h1 id="brand-name-display" class="font-bold text-base lg:text-lg leading-tight truncate text-amber-400">Donny Fun</h1>
-            <span class="text-xs text-stone-400 block">POS Web</span>
-          </div>
+<body>
+
+  <header>
+    <h1>DonnyFun POS ☕</h1>
+    <span class="status-badge" id="syncStatus">🟢 Conectado en Tiempo Real</span>
+  </header>
+
+  <div class="grid">
+    <!-- Formulario para ingresar pedido -->
+    <div class="card">
+      <h2>Nuevo Pedido</h2>
+      <form id="orderForm">
+        <div class="form-group">
+          <label for="client">Nombre del Cliente / Mesa</label>
+          <input type="text" id="client" placeholder="Ej: Mesa 3 o Juan" required>
         </div>
 
-        <nav class="flex lg:flex-col mt-0 lg:mt-4 px-2 lg:px-3 space-x-1 lg:space-x-0 lg:space-y-1 overflow-x-auto no-scrollbar items-center lg:items-stretch py-2 lg:py-0">
-          <button onclick="switchTab('pos')" id="nav-pos" class="flex lg:w-full items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white bg-stone-800 text-amber-400 whitespace-nowrap text-xs lg:text-sm">
-            <i class="fas fa-cash-register text-amber-500"></i> <span class="hidden md:inline">Tomar </span>Pedido
-          </button>
-          <button onclick="switchTab('kitchen')" id="nav-kitchen" class="flex lg:w-full items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-xs lg:text-sm">
-            <i class="fas fa-utensils text-amber-500"></i> Cocina
-          </button>
-          <button onclick="switchTab('checkout')" id="nav-checkout" class="flex lg:w-full items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-xs lg:text-sm">
-            <i class="fas fa-receipt text-amber-500"></i> Caja
-          </button>
-          
-          <div class="hidden lg:block pt-4 pb-1 px-4 text-xs font-semibold text-stone-500 uppercase tracking-wider">Admin</div>
-          
-          <button onclick="switchTab('products')" id="nav-products" class="flex lg:w-full items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-xs lg:text-sm">
-            <i class="fas fa-boxes text-amber-500"></i> <span class="hidden md:inline">Productos</span>
-          </button>
-          <button onclick="switchTab('categories')" id="nav-categories" class="flex lg:w-full items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-xs lg:text-sm">
-            <i class="fas fa-tags text-amber-500"></i> <span class="hidden md:inline">Categorías</span>
-          </button>
-          <button onclick="switchTab('tables')" id="nav-tables" class="flex lg:w-full items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-xs lg:text-sm">
-            <i class="fas fa-chair text-amber-500"></i> <span class="hidden md:inline">Mesas</span>
-          </button>
-          <button onclick="switchTab('reports')" id="nav-reports" class="flex lg:w-full items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-xs lg:text-sm">
-            <i class="fas fa-chart-bar text-amber-500"></i> <span class="hidden md:inline">Reportes</span>
-          </button>
-          <button onclick="switchTab('settings')" id="nav-settings" class="flex lg:w-full items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-xs lg:text-sm">
-            <i class="fas fa-cog text-amber-500"></i> <span class="hidden md:inline">Marca</span>
-          </button>
-        </nav>
-      </div>
-    </aside>
-
-    <!-- Contenido Principal -->
-    <main class="flex-1 bg-amber-50/50 overflow-y-auto relative flex flex-col h-[calc(100vh-4rem)] lg:h-screen">
-      <header class="bg-white border-b border-stone-200 px-4 lg:px-8 py-3 lg:py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm shrink-0">
-        <h2 id="page-title" class="text-lg lg:text-2xl font-bold text-stone-800">Tomar Pedido (POS)</h2>
-        <div class="flex items-center gap-3">
-          <span id="current-time" class="text-xs lg:text-sm font-semibold text-stone-500">00:00 PM</span>
+        <div class="form-group">
+          <label for="item">Producto / Detalle</label>
+          <input type="text" id="item" placeholder="Ej: 2 Capuchinos, 1 Donut" required>
         </div>
-      </header>
 
-      <div class="p-4 lg:p-6 flex-1 overflow-y-auto">
-        <!-- VISTA: TOMAR PEDIDO -->
-        <section id="view-pos" class="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 pb-12 lg:pb-0">
-          <div class="lg:col-span-7 flex flex-col space-y-4">
-            <div class="flex items-center justify-between bg-white p-3 lg:p-4 rounded-2xl shadow-sm border border-stone-200/80">
-              <label class="font-bold text-stone-700 text-sm lg:text-base flex items-center gap-2">
-                <i class="fas fa-chair text-amber-600"></i> Mesa:
-              </label>
-              <select id="pos-table-select" class="bg-amber-50 border border-stone-300 rounded-xl px-3 py-1.5 lg:px-4 lg:py-2 text-sm font-bold text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500">
-              </select>
-            </div>
+        <div class="form-group">
+          <label for="total">Total ($)</label>
+          <input type="number" step="0.01" id="total" placeholder="0.00" required>
+        </div>
 
-            <div id="pos-category-filters" class="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
-            </div>
+        <button type="submit">Enviar a Cocina / Caja</button>
+      </form>
+    </div>
 
-            <div id="pos-products-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3 lg:gap-4">
-            </div>
-          </div>
-
-          <div class="lg:col-span-5 bg-white rounded-2xl shadow-sm border border-stone-200/80 p-4 lg:p-5 flex flex-col">
-            <div class="flex items-center justify-between pb-3 border-b border-stone-100">
-              <h3 class="font-bold text-base lg:text-lg text-stone-800 flex items-center gap-2">
-                <i class="fas fa-shopping-basket text-amber-600"></i> Comanda Actual
-              </h3>
-              <button onclick="clearCurrentOrder()" class="text-xs text-rose-500 hover:text-rose-700 font-semibold">Vaciar</button>
-            </div>
-
-            <div id="pos-cart-items" class="py-3 space-y-2 max-h-60 lg:max-h-none overflow-y-auto no-scrollbar">
-            </div>
-
-            <div class="border-t border-stone-100 pt-3 space-y-2 mt-auto">
-              <div class="flex justify-between text-xs lg:text-sm text-stone-500">
-                <span>Subtotal</span>
-                <span id="pos-subtotal" class="font-semibold">$0.00</span>
-              </div>
-              <div class="flex justify-between text-lg lg:text-xl font-bold text-stone-900">
-                <span>Total</span>
-                <span id="pos-total" class="text-amber-700">$0.00</span>
-              </div>
-              <button onclick="sendOrderToKitchen()" class="w-full bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white font-bold py-3 rounded-xl shadow-lg shadow-amber-600/30 transition flex items-center justify-center gap-2 text-sm lg:text-base">
-                <i class="fas fa-paper-plane"></i> Enviar a Cocina
-              </button>
-            </div>
-          </div>
-        </section>
-
-        <!-- VISTA: COCINA -->
-        <section id="view-kitchen" class="hidden space-y-4 pb-12">
-          <p class="text-xs lg:text-sm text-stone-500">Control de pedidos pendientes y en preparación:</p>
-          <div id="kitchen-orders-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-        </section>
-
-        <!-- VISTA: CAJA -->
-        <section id="view-checkout" class="hidden space-y-4 pb-12">
-          <p class="text-xs lg:text-sm text-stone-500">Cobro de comandas listas:</p>
-          <div id="checkout-orders-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-        </section>
-
-        <!-- VISTA: PRODUCTOS -->
-        <section id="view-products" class="hidden space-y-4 pb-12">
-          <div class="flex justify-between items-center">
-            <h3 class="text-lg lg:text-xl font-bold text-stone-800">Catálogo</h3>
-            <button onclick="openProductModal()" class="bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 lg:px-4 lg:py-2 rounded-xl font-bold text-xs lg:text-sm flex items-center gap-2 shadow-md">
-              <i class="fas fa-plus"></i> Nuevo
-            </button>
-          </div>
-          <div class="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
-            <table class="w-full text-left border-collapse text-xs lg:text-sm">
-              <thead class="bg-stone-100 text-stone-600 uppercase">
-                <tr>
-                  <th class="p-3">Img</th>
-                  <th class="p-3">Nombre</th>
-                  <th class="p-3">Cat.</th>
-                  <th class="p-3">Precio</th>
-                  <th class="p-3 text-right">Acciones</th>
-                </tr>
-              </thead>
-              <tbody id="products-table-body" class="divide-y divide-stone-100"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- VISTA: CATEGORÍAS -->
-        <section id="view-categories" class="hidden space-y-4 pb-12">
-          <div class="flex justify-between items-center">
-            <h3 class="text-lg lg:text-xl font-bold text-stone-800">Categorías</h3>
-            <button onclick="openCategoryModal()" class="bg-amber-600 text-white px-3 py-1.5 rounded-xl font-bold text-xs lg:text-sm flex items-center gap-2 shadow-md">
-              <i class="fas fa-plus"></i> Nueva
-            </button>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="categories-grid"></div>
-        </section>
-
-        <!-- VISTA: MESAS -->
-        <section id="view-tables" class="hidden space-y-4 pb-12">
-          <div class="flex justify-between items-center">
-            <h3 class="text-lg lg:text-xl font-bold text-stone-800">Mesas</h3>
-            <button onclick="addTablePrompt()" class="bg-amber-600 text-white px-3 py-1.5 rounded-xl font-bold text-xs lg:text-sm flex items-center gap-2 shadow-md">
-              <i class="fas fa-plus"></i> Agregar
-            </button>
-          </div>
-          <div id="tables-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3"></div>
-        </section>
-
-        <!-- VISTA: REPORTES -->
-        <section id="view-reports" class="hidden space-y-4 pb-12">
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div class="bg-white p-4 lg:p-6 rounded-2xl border border-stone-200 shadow-sm">
-              <span class="text-xs font-semibold text-stone-400 uppercase">Total Vendido</span>
-              <h4 id="report-total-sales" class="text-2xl lg:text-3xl font-extrabold text-amber-600 mt-1">$0.00</h4>
-            </div>
-            <div class="bg-white p-4 lg:p-6 rounded-2xl border border-stone-200 shadow-sm">
-              <span class="text-xs font-semibold text-stone-400 uppercase">Efectivo</span>
-              <h4 id="report-cash-sales" class="text-2xl lg:text-3xl font-extrabold text-emerald-600 mt-1">$0.00</h4>
-            </div>
-            <div class="bg-white p-4 lg:p-6 rounded-2xl border border-stone-200 shadow-sm">
-              <span class="text-xs font-semibold text-stone-400 uppercase">Transferencia</span>
-              <h4 id="report-transfer-sales" class="text-2xl lg:text-3xl font-extrabold text-indigo-600 mt-1">$0.00</h4>
-            </div>
-          </div>
-
-          <div class="bg-white rounded-2xl border border-stone-200 p-4 lg:p-6 shadow-sm overflow-x-auto">
-            <h4 class="font-bold text-stone-800 mb-3 text-sm lg:text-base">Historial de Ventas</h4>
-            <table class="w-full text-left text-xs lg:text-sm">
-              <thead class="bg-stone-50 text-stone-500 uppercase">
-                <tr>
-                  <th class="p-2">Mesa</th>
-                  <th class="p-2">Hora</th>
-                  <th class="p-2">Método</th>
-                  <th class="p-2 text-right">Total</th>
-                </tr>
-              </thead>
-              <tbody id="reports-table-body" class="divide-y divide-stone-100"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- VISTA: CONFIGURACIÓN DE MARCA -->
-        <section id="view-settings" class="hidden max-w-xl mx-auto space-y-4 pb-12">
-          <div class="bg-white p-5 lg:p-6 rounded-2xl border border-stone-200 shadow-sm space-y-4">
-            <h3 class="text-base lg:text-lg font-bold text-stone-800 border-b border-stone-100 pb-3">Configuración Donny Fun</h3>
-            <div>
-              <label class="block text-xs lg:text-sm font-semibold text-stone-700 mb-1">Nombre</label>
-              <input type="text" id="setting-brand-name" class="w-full border border-stone-300 rounded-xl px-3 py-2 text-sm outline-none">
-            </div>
-            <div>
-              <label class="block text-xs lg:text-sm font-semibold text-stone-700 mb-1">URL o Logo Imagen</label>
-              <input type="file" accept="image/*" onchange="convertLogoToBase64(this)" class="w-full text-xs text-stone-500 mb-1">
-              <input type="text" id="setting-logo-url" placeholder="O pega enlace de imagen" class="w-full border border-stone-300 rounded-xl px-3 py-2 text-xs outline-none">
-            </div>
-            <button onclick="saveBrandSettings()" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-2.5 rounded-xl text-sm shadow-md">
-              Guardar Cambios
-            </button>
-          </div>
-        </section>
-      </div>
-    </main>
-  </div>
-
-  <!-- MODAL PRODUCTO -->
-  <div id="product-modal" class="fixed inset-0 bg-stone-900/50 z-40 flex items-center justify-center hidden p-4">
-    <div class="bg-white rounded-2xl p-6 w-96 shadow-2xl space-y-4">
-      <h3 class="font-bold text-stone-800 text-lg">Producto</h3>
-      <input type="hidden" id="prod-id">
-      <div>
-        <label class="text-xs font-semibold text-stone-600">Nombre</label>
-        <input type="text" id="prod-name" class="w-full border border-stone-300 rounded-xl p-2 text-sm outline-none">
-      </div>
-      <div>
-        <label class="text-xs font-semibold text-stone-600">Categoría</label>
-        <select id="prod-category" class="w-full border border-stone-300 rounded-xl p-2 text-sm outline-none"></select>
-      </div>
-      <div>
-        <label class="text-xs font-semibold text-stone-600">Precio ($)</label>
-        <input type="number" step="0.01" id="prod-price" class="w-full border border-stone-300 rounded-xl p-2 text-sm outline-none">
-      </div>
-      <div>
-        <label class="text-xs font-semibold text-stone-600">Imagen</label>
-        <input type="file" accept="image/*" onchange="convertProdImgToBase64(this)" class="w-full text-xs text-stone-500">
-        <input type="hidden" id="prod-img-base64">
-      </div>
-      <div class="flex justify-end gap-2 pt-2">
-        <button onclick="closeProductModal()" class="px-4 py-2 text-stone-500 font-bold text-xs">Cancelar</button>
-        <button onclick="saveProduct()" class="px-4 py-2 bg-amber-600 text-white rounded-xl font-bold text-xs">Guardar</button>
-      </div>
+    <!-- Lista de pedidos en tiempo real -->
+    <div class="card">
+      <h2>Pedidos Activos</h2>
+      <div id="ordersList">Cargando pedidos...</div>
     </div>
   </div>
 
-  <script>
-    let store = {
-      brand: { name: "Donny Fun", logo: "" },
-      categories: ["Bebidas Calientes", "Bebidas Frías", "Repostería", "Sándwiches"],
-      tables: ["Mesa 1", "Mesa 2", "Mesa 3", "Mesa 4", "Mesa 5"],
-      products: [
-        { id: '1', name: 'Café Americano', category: 'Bebidas Calientes', price: 2.50, img: '' },
-        { id: '2', name: 'Capuchino Donny', category: 'Bebidas Calientes', price: 3.25, img: '' },
-        { id: '3', name: 'Croissant Especial', category: 'Sándwiches', price: 3.80, img: '' }
-      ],
-      orders: [],
-      currentCart: []
+  <!-- Firebase SDK Modules -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { 
+      getFirestore, 
+      collection, 
+      addDoc, 
+      onSnapshot, 
+      doc, 
+      updateDoc, 
+      serverTimestamp, 
+      query, 
+      orderBy 
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // Configuración exacta de Firebase del proyecto DonnyFun
+    const firebaseConfig = {
+      apiKey: "AIzaSyAiXfZakNFTX9Ahru3doBrwsxpSR8EP5jc",
+      authDomain: "donny-fun.firebaseapp.com",
+      projectId: "donny-fun",
+      storageBucket: "donny-fun.firebasestorage.app",
+      messagingSenderId: "97165746529",
+      appId: "1:97165746529:web:3f034234121bf5d593a520",
+      measurementId: "G-YLXVZE93XJ"
     };
 
-    let selectedCategoryFilter = "Todos";
+    // Inicializar Firebase y Firestore
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const ordersRef = collection(db, "pedidos");
 
-    function init() {
-      const saved = localStorage.getItem('donny_fun_pos_data');
-      if (saved) store = JSON.parse(saved);
-      updateBrandUI();
-      renderPOS();
-      renderProducts();
-      renderCategories();
-      renderTables();
-      renderKitchen();
-      renderCheckout();
-      renderReports();
-      setInterval(() => {
-        document.getElementById('current-time').innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      }, 1000);
-    }
+    // Guardar nuevo pedido en la nube
+    const orderForm = document.getElementById("orderForm");
+    orderForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      
+      const client = document.getElementById("client").value;
+      const item = document.getElementById("item").value;
+      const total = parseFloat(document.getElementById("total").value);
 
-    function saveData() {
-      localStorage.setItem('donny_fun_pos_data', JSON.stringify(store));
-      renderPOS();
-      renderKitchen();
-      renderCheckout();
-      renderReports();
-    }
-
-    function updateBrandUI() {
-      document.getElementById('brand-name-display').innerText = store.brand.name;
-      document.getElementById('setting-brand-name').value = store.brand.name;
-      const logoImg = document.getElementById('brand-logo-img');
-      const logoIcon = document.getElementById('brand-icon-default');
-      if (store.brand.logo) {
-        logoImg.src = store.brand.logo;
-        logoImg.classList.remove('hidden');
-        logoIcon.classList.add('hidden');
-      } else {
-        logoImg.classList.add('hidden');
-        logoIcon.classList.remove('hidden');
+      try {
+        await addDoc(ordersRef, {
+          cliente: client,
+          detalle: item,
+          total: total,
+          estado: "pendiente",
+          fecha: serverTimestamp()
+        });
+        orderForm.reset();
+      } catch (error) {
+        console.error("Error al guardar pedido: ", error);
+        alert("Hubo un error al enviar el pedido.");
       }
-    }
+    });
 
-    function saveBrandSettings() {
-      store.brand.name = document.getElementById('setting-brand-name').value || "Donny Fun";
-      const logoUrl = document.getElementById('setting-logo-url').value;
-      if (logoUrl) store.brand.logo = logoUrl;
-      saveData();
-      updateBrandUI();
-      alert("Configuración guardada");
-    }
+    // Escuchar cambios en tiempo real desde Firestore
+    const ordersList = document.getElementById("ordersList");
+    const q = query(ordersRef, orderBy("fecha", "desc"));
 
-    function convertLogoToBase64(input) {
-      if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = (e) => { store.brand.logo = e.target.result; };
-        reader.readAsDataURL(input.files[0]);
+    onSnapshot(q, (snapshot) => {
+      ordersList.innerHTML = "";
+      if (snapshot.empty) {
+        ordersList.innerHTML = "<p>No hay pedidos registrados.</p>";
+        return;
       }
-    }
 
-    function switchTab(tab) {
-      ['pos', 'kitchen', 'checkout', 'products', 'categories', 'tables', 'reports', 'settings'].forEach(t => {
-        document.getElementById(`view-${t}`).classList.add('hidden');
-        document.getElementById(`nav-${t}`)?.classList.remove('bg-stone-800', 'text-amber-400');
-      });
-      document.getElementById(`view-${tab}`).classList.remove('hidden');
-      document.getElementById(`nav-${tab}`)?.classList.add('bg-stone-800', 'text-amber-400');
-      document.getElementById('page-title').innerText = document.getElementById(`nav-${tab}`).innerText.trim();
-    }
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        const id = docSnap.id;
 
-    function renderPOS() {
-      document.getElementById('pos-table-select').innerHTML = store.tables.map(t => `<option value="${t}">${t}</option>`).join('');
-      const cats = ["Todos", ...store.categories];
-      document.getElementById('pos-category-filters').innerHTML = cats.map(c => `
-        <button onclick="setCategoryFilter('${c}')" class="px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap border ${selectedCategoryFilter === c ? 'bg-amber-600 text-white border-amber-600' : 'bg-white text-stone-600 border-stone-200'}">${c}</button>
-      `).join('');
-
-      const filtered = selectedCategoryFilter === "Todos" ? store.products : store.products.filter(p => p.category === selectedCategoryFilter);
-      document.getElementById('pos-products-grid').innerHTML = filtered.map(p => `
-        <div onclick="addToCart('${p.id}')" class="bg-white p-3 rounded-2xl border border-stone-200 shadow-sm active:scale-95 transition cursor-pointer flex flex-col justify-between">
-          <div class="w-full h-20 bg-stone-100 rounded-xl mb-2 overflow-hidden flex items-center justify-center">
-            ${p.img ? `<img src="${p.img}" class="w-full h-full object-cover">` : `<i class="fas fa-coffee text-stone-300 text-xl"></i>`}
-          </div>
-          <h4 class="font-bold text-stone-800 text-xs truncate">${p.name}</h4>
-          <span class="text-amber-600 font-extrabold text-xs">$${p.price.toFixed(2)}</span>
-        </div>
-      `).join('');
-      renderCart();
-    }
-
-    function setCategoryFilter(cat) { selectedCategoryFilter = cat; renderPOS(); }
-
-    function addToCart(id) {
-      const p = store.products.find(item => item.id === id);
-      const ex = store.currentCart.find(item => item.id === id);
-      if (ex) ex.qty++; else store.currentCart.push({ ...p, qty: 1, checked: false });
-      renderCart();
-    }
-
-    function renderCart() {
-      document.getElementById('pos-cart-items').innerHTML = store.currentCart.map((item, idx) => `
-        <div class="flex items-center justify-between bg-stone-50 p-2.5 rounded-xl text-xs">
+        const itemDiv = document.createElement("div");
+        itemDiv.className = "order-item";
+        itemDiv.innerHTML = `
           <div>
-            <h5 class="font-bold text-stone-800">${item.name}</h5>
-            <span class="text-stone-500">$${item.price.toFixed(2)} c/u</span>
+            <strong>${data.cliente}</strong> - $${data.total ? data.total.toFixed(2) : "0.00"}<br>
+            <small style="color: #64748b;">${data.detalle}</small>
           </div>
-          <div class="flex items-center gap-1.5">
-            <button onclick="updateCartQty(${idx}, -1)" class="w-6 h-6 bg-white rounded font-bold border">-</button>
-            <span class="font-bold w-4 text-center">${item.qty}</span>
-            <button onclick="updateCartQty(${idx}, 1)" class="w-6 h-6 bg-white rounded font-bold border">+</button>
+          <div>
+            <span class="order-status status-${data.estado}">${data.estado}</span>
+            ${data.estado === 'pendiente' ? `<button style="margin-left: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.75rem; width: auto;" onclick="markAsReady('${id}')">Listo</button>` : ''}
           </div>
-        </div>
-      `).join('');
-      const total = store.currentCart.reduce((sum, i) => sum + (i.price * i.qty), 0);
-      document.getElementById('pos-subtotal').innerText = `$${total.toFixed(2)}`;
-      document.getElementById('pos-total').innerText = `$${total.toFixed(2)}`;
-    }
-
-    function updateCartQty(idx, d) {
-      store.currentCart[idx].qty += d;
-      if (store.currentCart[idx].qty <= 0) store.currentCart.splice(idx, 1);
-      renderCart();
-    }
-
-    function clearCurrentOrder() { store.currentCart = []; renderCart(); }
-
-    function sendOrderToKitchen() {
-      if (store.currentCart.length === 0) return alert("Selecciona productos");
-      store.orders.push({
-        id: Date.now().toString(),
-        table: document.getElementById('pos-table-select').value,
-        items: [...store.currentCart],
-        status: 'pendiente',
-        total: store.currentCart.reduce((sum, i) => sum + (i.price * i.qty), 0),
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        paymentMethod: ''
+        `;
+        ordersList.appendChild(itemDiv);
       });
-      store.currentCart = [];
-      saveData();
-      switchTab('kitchen');
-    }
+    });
 
-    function renderKitchen() {
-      const active = store.orders.filter(o => o.status !== 'pagado');
-      document.getElementById('kitchen-orders-grid').innerHTML = active.map(o => `
-        <div class="bg-white rounded-2xl border border-stone-200 p-4 shadow-sm space-y-3">
-          <div class="flex justify-between items-center border-b pb-2">
-            <span class="font-bold text-base text-stone-800">${o.table}</span>
-            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${getStatusClass(o.status)}">${o.status}</span>
-          </div>
-          <div class="space-y-1.5">
-            ${o.items.map((i, idx) => `
-              <label class="flex items-center gap-2 p-2 bg-stone-50 rounded-xl cursor-pointer text-xs">
-                <input type="checkbox" ${i.checked ? 'checked' : ''} onchange="toggleCheck('${o.id}', ${idx})" class="w-4 h-4 accent-amber-600 rounded">
-                <span class="font-semibold ${i.checked ? 'line-through text-stone-400' : 'text-stone-700'}">${i.qty}x ${i.name}</span>
-              </label>
-            `).join('')}
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function getStatusClass(s) {
-      if (s === 'pendiente') return 'bg-amber-100 text-amber-700';
-      if (s === 'en proceso') return 'bg-blue-100 text-blue-700';
-      return 'bg-emerald-100 text-emerald-700';
-    }
-
-    function toggleCheck(oid, iidx) {
-      const o = store.orders.find(item => item.id === oid);
-      o.items[iidx].checked = !o.items[iidx].checked;
-      const all = o.items.every(i => i.checked);
-      const any = o.items.some(i => i.checked);
-      o.status = all ? 'finalizado' : (any ? 'en proceso' : 'pendiente');
-      saveData();
-    }
-
-    function renderCheckout() {
-      const ready = store.orders.filter(o => o.status === 'finalizado');
-      document.getElementById('checkout-orders-grid').innerHTML = ready.map(o => `
-        <div class="bg-white rounded-2xl border-2 border-emerald-500 p-4 shadow-sm space-y-3">
-          <div class="flex justify-between items-center border-b pb-2">
-            <span class="font-bold text-base text-stone-800">${o.table}</span>
-            <span class="font-extrabold text-amber-600">$${o.total.toFixed(2)}</span>
-          </div>
-          <div class="text-xs text-stone-600">${o.items.map(i => `<div>${i.qty}x ${i.name}</div>`).join('')}</div>
-          <div class="grid grid-cols-2 gap-2 pt-1">
-            <button onclick="pay('${o.id}', 'efectivo')" class="bg-emerald-600 text-white font-bold py-2 rounded-xl text-xs">Efectivo</button>
-            <button onclick="pay('${o.id}', 'transferencia')" class="bg-indigo-600 text-white font-bold py-2 rounded-xl text-xs">Transferencia</button>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function pay(oid, method) {
-      const o = store.orders.find(item => item.id === oid);
-      o.status = 'pagado';
-      o.paymentMethod = method;
-      saveData();
-      alert("Cobro registrado");
-    }
-
-    function renderReports() {
-      const paid = store.orders.filter(o => o.status === 'pagado');
-      const total = paid.reduce((s, o) => s + o.total, 0);
-      const cash = paid.filter(o => o.paymentMethod === 'efectivo').reduce((s, o) => s + o.total, 0);
-      const transfer = paid.filter(o => o.paymentMethod === 'transferencia').reduce((s, o) => s + o.total, 0);
-      document.getElementById('report-total-sales').innerText = `$${total.toFixed(2)}`;
-      document.getElementById('report-cash-sales').innerText = `$${cash.toFixed(2)}`;
-      document.getElementById('report-transfer-sales').innerText = `$${transfer.toFixed(2)}`;
-      document.getElementById('reports-table-body').innerHTML = paid.map(o => `
-        <tr>
-          <td class="p-2 font-bold">${o.table}</td>
-          <td class="p-2 text-stone-500">${o.time}</td>
-          <td class="p-2 uppercase font-bold text-[10px]">${o.paymentMethod}</td>
-          <td class="p-2 text-right font-extrabold text-amber-600">$${o.total.toFixed(2)}</td>
-        </tr>
-      `).join('');
-    }
-
-    function renderProducts() {
-      document.getElementById('products-table-body').innerHTML = store.products.map(p => `
-        <tr>
-          <td class="p-2"><div class="w-8 h-8 rounded bg-stone-100 flex items-center justify-center">${p.img ? `<img src="${p.img}" class="w-full h-full object-cover">` : `<i class="fas fa-coffee text-stone-400 text-xs"></i>`}</div></td>
-          <td class="p-2 font-bold">${p.name}</td>
-          <td class="p-2 text-stone-500">${p.category}</td>
-          <td class="p-2 font-bold text-amber-600">$${p.price.toFixed(2)}</td>
-          <td class="p-2 text-right">
-            <button onclick="deleteProduct('${p.id}')" class="text-rose-600"><i class="fas fa-trash"></i></button>
-          </td>
-        </tr>
-      `).join('');
-      document.getElementById('prod-category').innerHTML = store.categories.map(c => `<option value="${c}">${c}</option>`).join('');
-    }
-
-    function openProductModal() { document.getElementById('product-modal').classList.remove('hidden'); }
-    function closeProductModal() { document.getElementById('product-modal').classList.add('hidden'); }
-
-    function saveProduct() {
-      const name = document.getElementById('prod-name').value;
-      const category = document.getElementById('prod-category').value;
-      const price = parseFloat(document.getElementById('prod-price').value);
-      const img = document.getElementById('prod-img-base64').value;
-      if (!name || isNaN(price)) return alert("Completa los campos");
-      store.products.push({ id: Date.now().toString(), name, category, price, img });
-      saveData();
-      renderProducts();
-      closeProductModal();
-    }
-
-    function convertProdImgToBase64(input) {
-      if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = (e) => { document.getElementById('prod-img-base64').value = e.target.result; };
-        reader.readAsDataURL(input.files[0]);
-      }
-    }
-
-    function deleteProduct(id) {
-      if (confirm("¿Eliminar?")) { store.products = store.products.filter(p => p.id !== id); saveData(); renderProducts(); }
-    }
-
-    function renderCategories() {
-      document.getElementById('categories-grid').innerHTML = store.categories.map(c => `
-        <div class="bg-white p-3 rounded-xl border border-stone-200 flex justify-between items-center text-xs">
-          <span class="font-bold">${c}</span>
-          <button onclick="deleteCategory('${c}')" class="text-rose-600"><i class="fas fa-trash"></i></button>
-        </div>
-      `).join('');
-    }
-
-    function openCategoryModal() {
-      const name = prompt("Nueva categoría:");
-      if (name && !store.categories.includes(name)) { store.categories.push(name); saveData(); renderCategories(); }
-    }
-
-    function deleteCategory(name) {
-      if (confirm(`¿Eliminar ${name}?`)) { store.categories = store.categories.filter(c => c !== name); saveData(); renderCategories(); }
-    }
-
-    function renderTables() {
-      document.getElementById('tables-grid').innerHTML = store.tables.map(t => `
-        <div class="bg-white p-3 rounded-xl border border-stone-200 text-center font-bold text-xs flex flex-col justify-between items-center gap-1">
-          <span>${t}</span>
-          <button onclick="deleteTable('${t}')" class="text-[10px] text-rose-500">Eliminar</button>
-        </div>
-      `).join('');
-    }
-
-    function addTablePrompt() {
-      const name = prompt("Nombre de mesa (Ej: Mesa 6):");
-      if (name && !store.tables.includes(name)) { store.tables.push(name); saveData(); renderTables(); }
-    }
-
-    function deleteTable(name) {
-      if (confirm(`¿Eliminar ${name}?`)) { store.tables = store.tables.filter(t => t !== name); saveData(); renderTables(); }
-    }
-
-    init();
+    // Cambiar estado de pedido a Listo
+    window.markAsReady = async (id) => {
+      const docRef = doc(db, "pedidos", id);
+      await updateDoc(docRef, { estado: "listo" });
+    };
   </script>
 </body>
 </html>
