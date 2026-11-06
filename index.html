@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Sistema POS Cafetería Donny Fun</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-amber-50 font-sans text-stone-800 antialiased selection:bg-amber-200">
+  <!-- Layout general adaptable para celulares y tablets -->
+  <div id="app" class="flex flex-col lg:flex-row h-screen overflow-hidden">
+    
+    <!-- Barra de Navegación / Menú Lateral -->
+    <aside class="w-full lg:w-64 bg-stone-900 text-stone-100 flex flex-row lg:flex-col justify-between shadow-xl z-20 shrink-0">
+      <div class="flex lg:flex-col items-center lg:items-stretch w-full justify-between lg:justify-start">
+        <!-- Logo y Nombre -->
+        <div class="p-3 lg:p-5 flex items-center gap-3 border-b-0 lg:border-b border-stone-800">
+          <div id="brand-logo-container" class="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-amber-600 flex items-center justify-center overflow-hidden shrink-0 border-2 border-amber-400">
+            <i id="brand-icon-default" class="fas fa-coffee text-white text-lg lg:text-xl"></i>
+            <img id="brand-logo-img" class="w-full h-full object-cover hidden" alt="Logo">
+          </div>
+          <div class="overflow-hidden hidden sm:block">
+            <h1 id="brand-name-display" class="font-bold text-base lg:text-lg leading-tight truncate text-amber-400">Donny Fun</h1>
+            <span class="text-xs text-stone-400 block">POS Web</span>
+          </div>
+        </div>
+
+        <!-- Navegación -->
+        <nav class="flex lg:flex-col mt-0 lg:mt-4 px-2 lg:px-3 space-x-1 lg:space-x-0 lg:space-y-1 overflow-x-auto no-scrollbar items-center lg:items-stretch py-2 lg:py-0">
+          <button onclick="switchTab('pos')" id="nav-pos" class="flex lg:w-full items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white bg-stone-800 text-amber-400 whitespace-nowrap text-xs lg:text-sm">
+            <i class="fas fa-cash-register text-amber-500"></i> <span class="hidden md:inline">Tomar </span>Pedido
+          </button>
+          <button onclick="switchTab('kitchen')" id="nav-kitchen" class="flex lg:w-full items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-xs lg:text-sm">
+            <i class="fas fa-utensils text-amber-500"></i> Cocina
+          </button>
+          <button onclick="switchTab('checkout')" id="nav-checkout" class="flex lg:w-full items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-xs lg:text-sm">
+            <i class="fas fa-receipt text-amber-500"></i> Caja
+          </button>
+          
+          <div class="hidden lg:block pt-4 pb-1 px-4 text-xs font-semibold text-stone-500 uppercase tracking-wider">Admin</div>
+          
+          <button onclick="requireAdmin(() => switchTab('products'))" id="nav-products" class="flex lg:w-full items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-xs lg:text-sm">
+            <i class="fas fa-boxes text-amber-500"></i> <span class="hidden md:inline">Productos</span> <i class="fas fa-lock text-[10px] text-stone-600 ml-auto hidden lg:inline"></i>
+          </button>
+          <button onclick="requireAdmin(() => switchTab('categories'))" id="nav-categories" class="flex lg:w-full items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-xs lg:text-sm">
+            <i class="fas fa-tags text-amber-500"></i> <span class="hidden md:inline">Categorías</span> <i class="fas fa-lock text-[10px] text-stone-600 ml-auto hidden lg:inline"></i>
+          </button>
+          <button onclick="requireAdmin(() => switchTab('tables'))" id="nav-tables" class="flex lg:w-full items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-xs lg:text-sm">
+            <i class="fas fa-chair text-amber-500"></i> <span class="hidden md:inline">Mesas</span> <i class="fas fa-lock text-[10px] text-stone-600 ml-auto hidden lg:inline"></i>
+          </button>
+          <button onclick="requireAdmin(() => switchTab('reports'))" id="nav-reports" class="flex lg:w-full items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-xs lg:text-sm">
+            <i class="fas fa-chart-bar text-amber-500"></i> <span class="hidden md:inline">Reportes</span> <i class="fas fa-lock text-[10px] text-stone-600 ml-auto hidden lg:inline"></i>
+          </button>
+          <button onclick="requireAdmin(() => switchTab('settings'))" id="nav-settings" class="flex lg:w-full items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-xs lg:text-sm">
+            <i class="fas fa-cog text-amber-500"></i> <span class="hidden md:inline">Marca/PIN</span> <i class="fas fa-lock text-[10px] text-stone-600 ml-auto hidden lg:inline"></i>
+          </button>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- Contenido Principal -->
+    <main class="flex-1 bg-amber-50/50 overflow-y-auto relative flex flex-col h-[calc(100vh-4rem)] lg:h-screen">
+      <header class="bg-white border-b border-stone-200 px-4 lg:px-8 py-3 lg:py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm shrink-0">
+        <h2 id="page-title" class="text-lg lg:text-2xl font-bold text-stone-800">Tomar Pedido (POS)</h2>
+        <div class="flex items-center gap-3">
+          <span id="current-time" class="text-xs lg:text-sm font-semibold text-stone-500">00:00 PM</span>
+        </div>
+      </header>
+
+      <div class="p-4 lg:p-6 flex-1 overflow-y-auto">
+        <!-- VISTA: TOMAR PEDIDO -->
+        <section id="view-pos" class="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 pb-12 lg:pb-0">
+          <div class="lg:col-span-7 flex flex-col space-y-4">
+            <div class="flex items-center justify-between bg-white p-3 lg:p-4 rounded-2xl shadow-sm border border-stone-200/80">
+              <label class="font-bold text-stone-700 text-sm lg:text-base flex items-center gap-2">
+                <i class="fas fa-chair text-amber-600"></i> Mesa:
+              </label>
+              <select id="pos-table-select" class="bg-amber-50 border border-stone-300 rounded-xl px-3 py-1.5 lg:px-4 lg:py-2 text-sm font-bold text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500">
+              </select>
+            </div>
+
+            <div id="pos-category-filters" class="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+            </div>
+
+            <div id="pos-products-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3 lg:gap-4">
+            </div>
+          </div>
+
+          <div class="lg:col-span-5 bg-white rounded-2xl shadow-sm border border-stone-200/80 p-4 lg:p-5 flex flex-col">
+            <div class="flex items-center justify-between pb-3 border-b border-stone-100">
+              <h3 class="font-bold text-base lg:text-lg text-stone-800 flex items-center gap-2">
+                <i class="fas fa-shopping-basket text-amber-600"></i> Comanda Actual
+              </h3>
+              <button onclick="clearCurrentOrder()" class="text-xs text-rose-500 hover:text-rose-700 font-semibold">Vaciar</button>
+            </div>
+
+            <div id="pos-cart-items" class="py-3 space-y-2 max-h-60 lg:max-h-none overflow-y-auto no-scrollbar">
+            </div>
+
+            <div class="border-t border-stone-100 pt-3 space-y-2 mt-auto">
+              <div class="flex justify-between text-xs lg:text-sm text-stone-500">
+                <span>Subtotal</span>
+                <span id="pos-subtotal" class="font-semibold">$0.00</span>
+              </div>
+              <div class="flex justify-between text-lg lg:text-xl font-bold text-stone-900">
+                <span>Total</span>
+                <span id="pos-total" class="text-amber-700">$0.00</span>
+              </div>
+              <button onclick="sendOrderToKitchen()" class="w-full bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white font-bold py-3 rounded-xl shadow-lg shadow-amber-600/30 transition flex items-center justify-center gap-2 text-sm lg:text-base">
+                <i class="fas fa-paper-plane"></i> Enviar a Cocina
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- VISTA: COCINA -->
+        <section id="view-kitchen" class="hidden space-y-4 pb-12">
+          <p class="text-xs lg:text-sm text-stone-500">Control de pedidos pendientes y en preparación:</p>
+          <div id="kitchen-orders-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </section>
+
+        <!-- VISTA: CAJA -->
+        <section id="view-checkout" class="hidden space-y-4 pb-12">
+          <p class="text-xs lg:text-sm text-stone-500">Cobro de comandas listas:</p>
+          <div id="checkout-orders-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </section>
+
+        <!-- VISTA: PRODUCTOS -->
+        <section id="view-products" class="hidden space-y-4 pb-12">
+          <div class="flex justify-between items-center">
+            <h3 class="text-lg lg:text-xl font-bold text-stone-800">Catálogo</h3>
+            <button onclick="openProductModal()" class="bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 lg:px-4 lg:py-2 rounded-xl font-bold text-xs lg:text-sm flex items-center gap-2 shadow-md">
+              <i class="fas fa-plus"></i> Nuevo
+            </button>
+          </div>
+          <div class="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
+            <table class="w-full text-left border-collapse text-xs lg:text-sm">
+              <thead class="bg-stone-100 text-stone-600 uppercase">
+                <tr>
+                  <th class="p-3">Img</th>
+                  <th class="p-3">Nombre</th>
+                  <th class="p-3">Cat.</th>
+                  <th class="p-3">Precio</th>
+                  <th class="p-3 text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="products-table-body" class="divide-y divide-stone-100"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- VISTA: CATEGORÍAS -->
+        <section id="view-categories" class="hidden space-y-4 pb-12">
+          <div class="flex justify-between items-center">
+            <h3 class="text-lg lg:text-xl font-bold text-stone-800">Categorías</h3>
+            <button onclick="openCategoryModal()" class="bg-amber-600 text-white px-3 py-1.5 rounded-xl font-bold text-xs lg:text-sm flex items-center gap-2 shadow-md">
+              <i class="fas fa-plus"></i> Nueva
+            </button>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="categories-grid"></div>
+        </section>
+
+        <!-- VISTA: MESAS -->
+        <section id="view-tables" class="hidden space-y-4 pb-12">
+          <div class="flex justify-between items-center">
+            <h3 class="text-lg lg:text-xl font-bold text-stone-800">Mesas</h3>
+            <button onclick="addTablePrompt()" class="bg-amber-600 text-white px-3 py-1.5 rounded-xl font-bold text-xs lg:text-sm flex items-center gap-2 shadow-md">
+              <i class="fas fa-plus"></i> Agregar
+            </button>
+          </div>
+          <div id="tables-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3"></div>
+        </section>
+
+        <!-- VISTA: REPORTES -->
+        <section id="view-reports" class="hidden space-y-4 pb-12">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bg-white p-4 lg:p-6 rounded-2xl border border-stone-200 shadow-sm">
+              <span class="text-xs font-semibold text-stone-400 uppercase">Total Vendido</span>
+              <h4 id="report-total-sales" class="text-2xl lg:text-3xl font-extrabold text-amber-600 mt-1">$0.00</h4>
+            </div>
+            <div class="bg-white p-4 lg:p-6 rounded-2xl border border-stone-200 shadow-sm">
+              <span class="text-xs font-semibold text-stone-400 uppercase">Efectivo</span>
+              <h4 id="report-cash-sales" class="text-2xl lg:text-3xl font-extrabold text-emerald-600 mt-1">$0.00</h4>
+            </div>
+            <div class="bg-white p-4 lg:p-6 rounded-2xl border border-stone-200 shadow-sm">
+              <span class="text-xs font-semibold text-stone-400 uppercase">Transferencia</span>
+              <h4 id="report-transfer-sales" class="text-2xl lg:text-3xl font-extrabold text-indigo-600 mt-1">$0.00</h4>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-stone-200 p-4 lg:p-6 shadow-sm overflow-x-auto">
+            <h4 class="font-bold text-stone-800 mb-3 text-sm lg:text-base">Historial de Ventas</h4>
+            <table class="w-full text-left text-xs lg:text-sm">
+              <thead class="bg-stone-50 text-stone-500 uppercase">
+                <tr>
+                  <th class="p-2">Mesa</th>
+                  <th class="p-2">Hora</th>
+                  <th class="p-2">Método</th>
+                  <th class="p-2 text-right">Total</th>
+                </tr>
+              </thead>
+              <tbody id="reports-table-body" class="divide-y divide-stone-100"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- VISTA: CONFIGURACIÓN DE MARCA -->
+        <section id="view-settings" class="hidden max-w-xl mx-auto space-y-4 pb-12">
+          <div class="bg-white p-5 lg:p-6 rounded-2xl border border-stone-200 shadow-sm space-y-4">
+            <h3 class="text-base lg:text-lg font-bold text-stone-800 border-b border-stone-100 pb-3">Configuración Donny Fun</h3>
+            <div>
+              <label class="block text-xs lg:text-sm font-semibold text-stone-700 mb-1">Nombre</label>
+              <input type="text" id="setting-brand-name" class="w-full border border-stone-300 rounded-xl px-3 py-2 text-sm outline-none">
+            </div>
+            <div>
+              <label class="block text-xs lg:text-sm font-semibold text-stone-700 mb-1">URL o Logo Imagen</label>
+              <input type="file" accept="image/*" onchange="convertLogoToBase64(this)" class="w-full text-xs text-stone-500 mb-1">
+              <input type="text" id="setting-logo-url" placeholder="O pega enlace de imagen" class="w-full border border-stone-300 rounded-xl px-3 py-2 text-xs outline-none">
+            </div>
+            <div>
+              <label class="block text-xs lg:text-sm font-semibold text-stone-700 mb-1">PIN Administrador (4 dígitos)</label>
+              <input type="password" id="setting-admin-pin" maxlength="4" class="w-full border border-stone-300 rounded-xl px-3 py-2 text-sm font-mono outline-none">
+            </div>
+            <button onclick="saveBrandSettings()" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-2.5 rounded-xl text-sm shadow-md">
+              Guardar Cambios
+            </button>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL PIN -->
+  <div id="pin-modal" class="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-2xl p-6 w-80 shadow-2xl text-center space-y-4">
+      <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto">
+        <i class="fas fa-lock text-xl"></i>
+      </div>
+      <h3 class="font-bold text-stone-800 text-lg">Acceso Administrador</h3>
+      <p class="text-xs text-stone-500">PIN de 4 dígitos (Por defecto: 1234)</p>
+      <input type="password" id="pin-input" maxlength="4" class="w-full text-center text-2xl font-mono tracking-widest border border-stone-300 rounded-xl py-2 outline-none" placeholder="••••">
+      <div class="flex gap-2">
+        <button onclick="closePinModal()" class="w-1/2 py-2 text-stone-500 hover:bg-stone-100 rounded-xl font-bold text-sm">Cancelar</button>
+        <button onclick="verifyPin()" class="w-1/2 bg-amber-600 text-white py-2 rounded-xl font-bold text-sm">Ingresar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PRODUCTO -->
+  <div id="product-modal" class="fixed inset-0 bg-stone-900/50 z-40 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-2xl p-6 w-96 shadow-2xl space-y-4">
+      <h3 class="font-bold text-stone-800 text-lg">Producto</h3>
+      <input type="hidden" id="prod-id">
+      <div>
+        <label class="text-xs font-semibold text-stone-600">Nombre</label>
+        <input type="text" id="prod-name" class="w-full border border-stone-300 rounded-xl p-2 text-sm outline-none">
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-stone-600">Categoría</label>
+        <select id="prod-category" class="w-full border border-stone-300 rounded-xl p-2 text-sm outline-none"></select>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-stone-600">Precio ($)</label>
+        <input type="number" step="0.01" id="prod-price" class="w-full border border-stone-300 rounded-xl p-2 text-sm outline-none">
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-stone-600">Imagen</label>
+        <input type="file" accept="image/*" onchange="convertProdImgToBase64(this)" class="w-full text-xs text-stone-500">
+        <input type="hidden" id="prod-img-base64">
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeProductModal()" class="px-4 py-2 text-stone-500 font-bold text-xs">Cancelar</button>
+        <button onclick="saveProduct()" class="px-4 py-2 bg-amber-600 text-white rounded-xl font-bold text-xs">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let store = {
+      brand: { name: "Donny Fun", logo: "", pin: "1234" },
+      categories: ["Bebidas Calientes", "Bebidas Frías", "Repostería", "Sándwiches"],
+      tables: ["Mesa 1", "Mesa 2", "Mesa 3", "Mesa 4", "Mesa 5"],
+      products: [
+        { id: '1', name: 'Café Americano', category: 'Bebidas Calientes', price: 2.50, img: '' },
+        { id: '2', name: 'Capuchino Donny', category: 'Bebidas Calientes', price: 3.25, img: '' },
+        { id: '3', name: 'Croissant Especial', category: 'Sándwiches', price: 3.80, img: '' }
+      ],
+      orders: [],
+      currentCart: []
+    };
+
+    let pendingAdminAction = null;
+    let selectedCategoryFilter = "Todos";
+
+    function init() {
+      const saved = localStorage.getItem('donny_fun_pos_data');
+      if (saved) store = JSON.parse(saved);
+      updateBrandUI();
+      renderPOS();
+      renderProducts();
+      renderCategories();
+      renderTables();
+      renderKitchen();
+      renderCheckout();
+      renderReports();
+      setInterval(() => {
+        document.getElementById('current-time').innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }, 1000);
+    }
+
+    function saveData() {
+      localStorage.setItem('donny_fun_pos_data', JSON.stringify(store));
+      renderPOS();
+      renderKitchen();
+      renderCheckout();
+      renderReports();
+    }
+
+    function requireAdmin(action) {
+      pendingAdminAction = action;
+      document.getElementById('pin-input').value = '';
+      document.getElementById('pin-modal').classList.remove('hidden');
+    }
+
+    function closePinModal() {
+      document.getElementById('pin-modal').classList.add('hidden');
+      pendingAdminAction = null;
+    }
+
+    function verifyPin() {
+      if (document.getElementById('pin-input').value === store.brand.pin) {
+        closePinModal();
+        if (pendingAdminAction) pendingAdminAction();
+      } else {
+        alert("PIN Incorrecto");
+      }
+    }
+
+    function updateBrandUI() {
+      document.getElementById('brand-name-display').innerText = store.brand.name;
+      document.getElementById('setting-brand-name').value = store.brand.name;
+      document.getElementById('setting-admin-pin').value = store.brand.pin;
+      const logoImg = document.getElementById('brand-logo-img');
+      const logoIcon = document.getElementById('brand-icon-default');
+      if (store.brand.logo) {
+        logoImg.src = store.brand.logo;
+        logoImg.classList.remove('hidden');
+        logoIcon.classList.add('hidden');
+      } else {
+        logoImg.classList.add('hidden');
+        logoIcon.classList.remove('hidden');
+      }
+    }
+
+    function saveBrandSettings() {
+      store.brand.name = document.getElementById('setting-brand-name').value || "Donny Fun";
+      store.brand.pin = document.getElementById('setting-admin-pin').value || "1234";
+      const logoUrl = document.getElementById('setting-logo-url').value;
+      if (logoUrl) store.brand.logo = logoUrl;
+      saveData();
+      updateBrandUI();
+      alert("Configuración guardada");
+    }
+
+    function convertLogoToBase64(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = (e) => { store.brand.logo = e.target.result; };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    function switchTab(tab) {
+      ['pos', 'kitchen', 'checkout', 'products', 'categories', 'tables', 'reports', 'settings'].forEach(t => {
+        document.getElementById(`view-${t}`).classList.add('hidden');
+        document.getElementById(`nav-${t}`)?.classList.remove('bg-stone-800', 'text-amber-400');
+      });
+      document.getElementById(`view-${tab}`).classList.remove('hidden');
+      document.getElementById(`nav-${tab}`)?.classList.add('bg-stone-800', 'text-amber-400');
+      document.getElementById('page-title').innerText = document.getElementById(`nav-${tab}`).innerText.trim();
+    }
+
+    function renderPOS() {
+      document.getElementById('pos-table-select').innerHTML = store.tables.map(t => `<option value="${t}">${t}</option>`).join('');
+      const cats = ["Todos", ...store.categories];
+      document.getElementById('pos-category-filters').innerHTML = cats.map(c => `
+        <button onclick="setCategoryFilter('${c}')" class="px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap border ${selectedCategoryFilter === c ? 'bg-amber-600 text-white border-amber-600' : 'bg-white text-stone-600 border-stone-200'}">${c}</button>
+      `).join('');
+
+      const filtered = selectedCategoryFilter === "Todos" ? store.products : store.products.filter(p => p.category === selectedCategoryFilter);
+      document.getElementById('pos-products-grid').innerHTML = filtered.map(p => `
+        <div onclick="addToCart('${p.id}')" class="bg-white p-3 rounded-2xl border border-stone-200 shadow-sm active:scale-95 transition cursor-pointer flex flex-col justify-between">
+          <div class="w-full h-20 bg-stone-100 rounded-xl mb-2 overflow-hidden flex items-center justify-center">
+            ${p.img ? `<img src="${p.img}" class="w-full h-full object-cover">` : `<i class="fas fa-coffee text-stone-300 text-xl"></i>`}
+          </div>
+          <h4 class="font-bold text-stone-800 text-xs truncate">${p.name}</h4>
+          <span class="text-amber-600 font-extrabold text-xs">$${p.price.toFixed(2)}</span>
+        </div>
+      `).join('');
+      renderCart();
+    }
+
+    function setCategoryFilter(cat) { selectedCategoryFilter = cat; renderPOS(); }
+
+    function addToCart(id) {
+      const p = store.products.find(item => item.id === id);
+      const ex = store.currentCart.find(item => item.id === id);
+      if (ex) ex.qty++; else store.currentCart.push({ ...p, qty: 1, checked: false });
+      renderCart();
+    }
+
+    function renderCart() {
+      document.getElementById('pos-cart-items').innerHTML = store.currentCart.map((item, idx) => `
+        <div class="flex items-center justify-between bg-stone-50 p-2.5 rounded-xl text-xs">
+          <div>
+            <h5 class="font-bold text-stone-800">${item.name}</h5>
+            <span class="text-stone-500">$${item.price.toFixed(2)} c/u</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button onclick="updateCartQty(${idx}, -1)" class="w-6 h-6 bg-white rounded font-bold border">-</button>
+            <span class="font-bold w-4 text-center">${item.qty}</span>
+            <button onclick="updateCartQty(${idx}, 1)" class="w-6 h-6 bg-white rounded font-bold border">+</button>
+          </div>
+        </div>
+      `).join('');
+      const total = store.currentCart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+      document.getElementById('pos-subtotal').innerText = `$${total.toFixed(2)}`;
+      document.getElementById('pos-total').innerText = `$${total.toFixed(2)}`;
+    }
+
+    function updateCartQty(idx, d) {
+      store.currentCart[idx].qty += d;
+      if (store.currentCart[idx].qty <= 0) store.currentCart.splice(idx, 1);
+      renderCart();
+    }
+
+    function clearCurrentOrder() { store.currentCart = []; renderCart(); }
+
+    function sendOrderToKitchen() {
+      if (store.currentCart.length === 0) return alert("Selecciona productos");
+      store.orders.push({
+        id: Date.now().toString(),
+        table: document.getElementById('pos-table-select').value,
+        items: [...store.currentCart],
+        status: 'pendiente',
+        total: store.currentCart.reduce((sum, i) => sum + (i.price * i.qty), 0),
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        paymentMethod: ''
+      });
+      store.currentCart = [];
+      saveData();
+      switchTab('kitchen');
+    }
+
+    function renderKitchen() {
+      const active = store.orders.filter(o => o.status !== 'pagado');
+      document.getElementById('kitchen-orders-grid').innerHTML = active.map(o => `
+        <div class="bg-white rounded-2xl border border-stone-200 p-4 shadow-sm space-y-3">
+          <div class="flex justify-between items-center border-b pb-2">
+            <span class="font-bold text-base text-stone-800">${o.table}</span>
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${getStatusClass(o.status)}">${o.status}</span>
+          </div>
+          <div class="space-y-1.5">
+            ${o.items.map((i, idx) => `
+              <label class="flex items-center gap-2 p-2 bg-stone-50 rounded-xl cursor-pointer text-xs">
+                <input type="checkbox" ${i.checked ? 'checked' : ''} onchange="toggleCheck('${o.id}', ${idx})" class="w-4 h-4 accent-amber-600 rounded">
+                <span class="font-semibold ${i.checked ? 'line-through text-stone-400' : 'text-stone-700'}">${i.qty}x ${i.name}</span>
+              </label>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function getStatusClass(s) {
+      if (s === 'pendiente') return 'bg-amber-100 text-amber-700';
+      if (s === 'en proceso') return 'bg-blue-100 text-blue-700';
+      return 'bg-emerald-100 text-emerald-700';
+    }
+
+    function toggleCheck(oid, iidx) {
+      const o = store.orders.find(item => item.id === oid);
+      o.items[iidx].checked = !o.items[iidx].checked;
+      const all = o.items.every(i => i.checked);
+      const any = o.items.some(i => i.checked);
+      o.status = all ? 'finalizado' : (any ? 'en proceso' : 'pendiente');
+      saveData();
+    }
+
+    function renderCheckout() {
+      const ready = store.orders.filter(o => o.status === 'finalizado');
+      document.getElementById('checkout-orders-grid').innerHTML = ready.map(o => `
+        <div class="bg-white rounded-2xl border-2 border-emerald-500 p-4 shadow-sm space-y-3">
+          <div class="flex justify-between items-center border-b pb-2">
+            <span class="font-bold text-base text-stone-800">${o.table}</span>
+            <span class="font-extrabold text-amber-600">$${o.total.toFixed(2)}</span>
+          </div>
+          <div class="text-xs text-stone-600">${o.items.map(i => `<div>${i.qty}x ${i.name}</div>`).join('')}</div>
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <button onclick="pay('${o.id}', 'efectivo')" class="bg-emerald-600 text-white font-bold py-2 rounded-xl text-xs">Efectivo</button>
+            <button onclick="pay('${o.id}', 'transferencia')" class="bg-indigo-600 text-white font-bold py-2 rounded-xl text-xs">Transferencia</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function pay(oid, method) {
+      const o = store.orders.find(item => item.id === oid);
+      o.status = 'pagado';
+      o.paymentMethod = method;
+      saveData();
+      alert("Cobro registrado");
+    }
+
+    function renderReports() {
+      const paid = store.orders.filter(o => o.status === 'pagado');
+      const total = paid.reduce((s, o) => s + o.total, 0);
+      const cash = paid.filter(o => o.paymentMethod === 'efectivo').reduce((s, o) => s + o.total, 0);
+      const transfer = paid.filter(o => o.paymentMethod === 'transferencia').reduce((s, o) => s + o.total, 0);
+      document.getElementById('report-total-sales').innerText = `$${total.toFixed(2)}`;
+      document.getElementById('report-cash-sales').innerText = `$${cash.toFixed(2)}`;
+      document.getElementById('report-transfer-sales').innerText = `$${transfer.toFixed(2)}`;
+      document.getElementById('reports-table-body').innerHTML = paid.map(o => `
+        <tr>
+          <td class="p-2 font-bold">${o.table}</td>
+          <td class="p-2 text-stone-500">${o.time}</td>
+          <td class="p-2 uppercase font-bold text-[10px]">${o.paymentMethod}</td>
+          <td class="p-2 text-right font-extrabold text-amber-600">$${o.total.toFixed(2)}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderProducts() {
+      document.getElementById('products-table-body').innerHTML = store.products.map(p => `
+        <tr>
+          <td class="p-2"><div class="w-8 h-8 rounded bg-stone-100 flex items-center justify-center">${p.img ? `<img src="${p.img}" class="w-full h-full object-cover">` : `<i class="fas fa-coffee text-stone-400 text-xs"></i>`}</div></td>
+          <td class="p-2 font-bold">${p.name}</td>
+          <td class="p-2 text-stone-500">${p.category}</td>
+          <td class="p-2 font-bold text-amber-600">$${p.price.toFixed(2)}</td>
+          <td class="p-2 text-right">
+            <button onclick="deleteProduct('${p.id}')" class="text-rose-600"><i class="fas fa-trash"></i></button>
+          </td>
+        </tr>
+      `).join('');
+      document.getElementById('prod-category').innerHTML = store.categories.map(c => `<option value="${c}">${c}</option>`).join('');
+    }
+
+    function openProductModal() { document.getElementById('product-modal').classList.remove('hidden'); }
+    function closeProductModal() { document.getElementById('product-modal').classList.add('hidden'); }
+
+    function saveProduct() {
+      const name = document.getElementById('prod-name').value;
+      const category = document.getElementById('prod-category').value;
+      const price = parseFloat(document.getElementById('prod-price').value);
+      const img = document.getElementById('prod-img-base64').value;
+      if (!name || isNaN(price)) return alert("Completa los campos");
+      store.products.push({ id: Date.now().toString(), name, category, price, img });
+      saveData();
+      renderProducts();
+      closeProductModal();
+    }
+
+    function convertLogoToBase64(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = (e) => { store.brand.logo = e.target.result; };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    function convertProdImgToBase64(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = (e) => { document.getElementById('prod-img-base64').value = e.target.result; };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    function deleteProduct(id) {
+      if (confirm("¿Eliminar?")) { store.products = store.products.filter(p => p.id !== id); saveData(); renderProducts(); }
+    }
+
+    function renderCategories() {
+      document.getElementById('categories-grid').innerHTML = store.categories.map(c => `
+        <div class="bg-white p-3 rounded-xl border border-stone-200 flex justify-between items-center text-xs">
+          <span class="font-bold">${c}</span>
+          <button onclick="deleteCategory('${c}')" class="text-rose-600"><i class="fas fa-trash"></i></button>
+        </div>
+      `).join('');
+    }
+
+    function openCategoryModal() {
+      const name = prompt("Nueva categoría:");
+      if (name && !store.categories.includes(name)) { store.categories.push(name); saveData(); renderCategories(); }
+    }
+
+    function deleteCategory(name) {
+      if (confirm(`¿Eliminar ${name}?`)) { store.categories = store.categories.filter(c => c !== name); saveData(); renderCategories(); }
+    }
+
+    function renderTables() {
+      document.getElementById('tables-grid').innerHTML = store.tables.map(t => `
+        <div class="bg-white p-3 rounded-xl border border-stone-200 text-center font-bold text-xs flex flex-col justify-between items-center gap-1">
+          <span>${t}</span>
+          <button onclick="deleteTable('${t}')" class="text-[10px] text-rose-500">Eliminar</button>
+        </div>
+      `).join('');
+    }
+
+    function addTablePrompt() {
+      const name = prompt("Nombre de mesa (Ej: Mesa 6):");
+      if (name && !store.tables.includes(name)) { store.tables.push(name); saveData(); renderTables(); }
+    }
+
+    function deleteTable(name) {
+      if (confirm(`¿Eliminar ${name}?`)) { store.tables = store.tables.filter(t => t !== name); saveData(); renderTables(); }
+    }
+
+    init();
+  </script>
+</body>
+</html>
