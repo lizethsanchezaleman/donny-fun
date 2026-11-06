@@ -12,13 +12,11 @@
   </style>
 </head>
 <body class="bg-amber-50 font-sans text-stone-800 antialiased selection:bg-amber-200">
-  <!-- Layout general adaptable para celulares y tablets -->
   <div id="app" class="flex flex-col lg:flex-row h-screen overflow-hidden">
     
     <!-- Barra de Navegación / Menú Lateral -->
     <aside class="w-full lg:w-64 bg-stone-900 text-stone-100 flex flex-row lg:flex-col justify-between shadow-xl z-20 shrink-0">
       <div class="flex lg:flex-col items-center lg:items-stretch w-full justify-between lg:justify-start">
-        <!-- Logo y Nombre -->
         <div class="p-3 lg:p-5 flex items-center gap-3 border-b-0 lg:border-b border-stone-800">
           <div id="brand-logo-container" class="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-amber-600 flex items-center justify-center overflow-hidden shrink-0 border-2 border-amber-400">
             <i id="brand-icon-default" class="fas fa-coffee text-white text-lg lg:text-xl"></i>
@@ -30,7 +28,6 @@
           </div>
         </div>
 
-        <!-- Navegación -->
         <nav class="flex lg:flex-col mt-0 lg:mt-4 px-2 lg:px-3 space-x-1 lg:space-x-0 lg:space-y-1 overflow-x-auto no-scrollbar items-center lg:items-stretch py-2 lg:py-0">
           <button onclick="switchTab('pos')" id="nav-pos" class="flex lg:w-full items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white bg-stone-800 text-amber-400 whitespace-nowrap text-xs lg:text-sm">
             <i class="fas fa-cash-register text-amber-500"></i> <span class="hidden md:inline">Tomar </span>Pedido
@@ -44,20 +41,20 @@
           
           <div class="hidden lg:block pt-4 pb-1 px-4 text-xs font-semibold text-stone-500 uppercase tracking-wider">Admin</div>
           
-          <button onclick="requireAdmin(() => switchTab('products'))" id="nav-products" class="flex lg:w-full items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-xs lg:text-sm">
-            <i class="fas fa-boxes text-amber-500"></i> <span class="hidden md:inline">Productos</span> <i class="fas fa-lock text-[10px] text-stone-600 ml-auto hidden lg:inline"></i>
+          <button onclick="switchTab('products')" id="nav-products" class="flex lg:w-full items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-xs lg:text-sm">
+            <i class="fas fa-boxes text-amber-500"></i> <span class="hidden md:inline">Productos</span>
           </button>
-          <button onclick="requireAdmin(() => switchTab('categories'))" id="nav-categories" class="flex lg:w-full items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-xs lg:text-sm">
-            <i class="fas fa-tags text-amber-500"></i> <span class="hidden md:inline">Categorías</span> <i class="fas fa-lock text-[10px] text-stone-600 ml-auto hidden lg:inline"></i>
+          <button onclick="switchTab('categories')" id="nav-categories" class="flex lg:w-full items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-xs lg:text-sm">
+            <i class="fas fa-tags text-amber-500"></i> <span class="hidden md:inline">Categorías</span>
           </button>
-          <button onclick="requireAdmin(() => switchTab('tables'))" id="nav-tables" class="flex lg:w-full items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-xs lg:text-sm">
-            <i class="fas fa-chair text-amber-500"></i> <span class="hidden md:inline">Mesas</span> <i class="fas fa-lock text-[10px] text-stone-600 ml-auto hidden lg:inline"></i>
+          <button onclick="switchTab('tables')" id="nav-tables" class="flex lg:w-full items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-xs lg:text-sm">
+            <i class="fas fa-chair text-amber-500"></i> <span class="hidden md:inline">Mesas</span>
           </button>
-          <button onclick="requireAdmin(() => switchTab('reports'))" id="nav-reports" class="flex lg:w-full items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-xs lg:text-sm">
-            <i class="fas fa-chart-bar text-amber-500"></i> <span class="hidden md:inline">Reportes</span> <i class="fas fa-lock text-[10px] text-stone-600 ml-auto hidden lg:inline"></i>
+          <button onclick="switchTab('reports')" id="nav-reports" class="flex lg:w-full items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-xs lg:text-sm">
+            <i class="fas fa-chart-bar text-amber-500"></i> <span class="hidden md:inline">Reportes</span>
           </button>
-          <button onclick="requireAdmin(() => switchTab('settings'))" id="nav-settings" class="flex lg:w-full items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-xs lg:text-sm">
-            <i class="fas fa-cog text-amber-500"></i> <span class="hidden md:inline">Marca/PIN</span> <i class="fas fa-lock text-[10px] text-stone-600 ml-auto hidden lg:inline"></i>
+          <button onclick="switchTab('settings')" id="nav-settings" class="flex lg:w-full items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-xs lg:text-sm">
+            <i class="fas fa-cog text-amber-500"></i> <span class="hidden md:inline">Marca</span>
           </button>
         </nav>
       </div>
@@ -222,10 +219,6 @@
               <input type="file" accept="image/*" onchange="convertLogoToBase64(this)" class="w-full text-xs text-stone-500 mb-1">
               <input type="text" id="setting-logo-url" placeholder="O pega enlace de imagen" class="w-full border border-stone-300 rounded-xl px-3 py-2 text-xs outline-none">
             </div>
-            <div>
-              <label class="block text-xs lg:text-sm font-semibold text-stone-700 mb-1">PIN Administrador (4 dígitos)</label>
-              <input type="password" id="setting-admin-pin" maxlength="4" class="w-full border border-stone-300 rounded-xl px-3 py-2 text-sm font-mono outline-none">
-            </div>
             <button onclick="saveBrandSettings()" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-2.5 rounded-xl text-sm shadow-md">
               Guardar Cambios
             </button>
@@ -233,22 +226,6 @@
         </section>
       </div>
     </main>
-  </div>
-
-  <!-- MODAL PIN -->
-  <div id="pin-modal" class="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-    <div class="bg-white rounded-2xl p-6 w-80 shadow-2xl text-center space-y-4">
-      <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto">
-        <i class="fas fa-lock text-xl"></i>
-      </div>
-      <h3 class="font-bold text-stone-800 text-lg">Acceso Administrador</h3>
-      <p class="text-xs text-stone-500">PIN de 4 dígitos (Por defecto: 1234)</p>
-      <input type="password" id="pin-input" maxlength="4" class="w-full text-center text-2xl font-mono tracking-widest border border-stone-300 rounded-xl py-2 outline-none" placeholder="••••">
-      <div class="flex gap-2">
-        <button onclick="closePinModal()" class="w-1/2 py-2 text-stone-500 hover:bg-stone-100 rounded-xl font-bold text-sm">Cancelar</button>
-        <button onclick="verifyPin()" class="w-1/2 bg-amber-600 text-white py-2 rounded-xl font-bold text-sm">Ingresar</button>
-      </div>
-    </div>
   </div>
 
   <!-- MODAL PRODUCTO -->
@@ -282,7 +259,7 @@
 
   <script>
     let store = {
-      brand: { name: "Donny Fun", logo: "", pin: "1234" },
+      brand: { name: "Donny Fun", logo: "" },
       categories: ["Bebidas Calientes", "Bebidas Frías", "Repostería", "Sándwiches"],
       tables: ["Mesa 1", "Mesa 2", "Mesa 3", "Mesa 4", "Mesa 5"],
       products: [
@@ -294,7 +271,6 @@
       currentCart: []
     };
 
-    let pendingAdminAction = null;
     let selectedCategoryFilter = "Todos";
 
     function init() {
@@ -321,30 +297,9 @@
       renderReports();
     }
 
-    function requireAdmin(action) {
-      pendingAdminAction = action;
-      document.getElementById('pin-input').value = '';
-      document.getElementById('pin-modal').classList.remove('hidden');
-    }
-
-    function closePinModal() {
-      document.getElementById('pin-modal').classList.add('hidden');
-      pendingAdminAction = null;
-    }
-
-    function verifyPin() {
-      if (document.getElementById('pin-input').value === store.brand.pin) {
-        closePinModal();
-        if (pendingAdminAction) pendingAdminAction();
-      } else {
-        alert("PIN Incorrecto");
-      }
-    }
-
     function updateBrandUI() {
       document.getElementById('brand-name-display').innerText = store.brand.name;
       document.getElementById('setting-brand-name').value = store.brand.name;
-      document.getElementById('setting-admin-pin').value = store.brand.pin;
       const logoImg = document.getElementById('brand-logo-img');
       const logoIcon = document.getElementById('brand-icon-default');
       if (store.brand.logo) {
@@ -359,7 +314,6 @@
 
     function saveBrandSettings() {
       store.brand.name = document.getElementById('setting-brand-name').value || "Donny Fun";
-      store.brand.pin = document.getElementById('setting-admin-pin').value || "1234";
       const logoUrl = document.getElementById('setting-logo-url').value;
       if (logoUrl) store.brand.logo = logoUrl;
       saveData();
@@ -563,14 +517,6 @@
       saveData();
       renderProducts();
       closeProductModal();
-    }
-
-    function convertLogoToBase64(input) {
-      if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = (e) => { store.brand.logo = e.target.result; };
-        reader.readAsDataURL(input.files[0]);
-      }
     }
 
     function convertProdImgToBase64(input) {
