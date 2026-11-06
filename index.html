@@ -231,10 +231,10 @@
     </main>
   </div>
 
-  <!-- MODAL PRODUCTO -->
+  <!-- MODAL PRODUCTO (Crear / Editar) -->
   <div id="product-modal" class="fixed inset-0 bg-stone-900/50 z-40 flex items-center justify-center hidden p-4">
     <div class="bg-white rounded-2xl p-6 w-96 shadow-2xl space-y-4">
-      <h3 class="font-bold text-stone-800 text-lg">Producto</h3>
+      <h3 id="prod-modal-title" class="font-bold text-stone-800 text-lg">Nuevo Producto</h3>
       <input type="hidden" id="prod-id">
       <div>
         <label class="text-xs font-semibold text-stone-600">Nombre</label>
@@ -260,7 +260,7 @@
     </div>
   </div>
 
-  <!-- Script Firebase y Lógica Sincronizada -->
+  <!-- Script Firebase y Lógica Sincronizada con Edición -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { 
@@ -270,7 +270,7 @@
       onSnapshot 
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // Configuración exacta de Firebase del proyecto DonnyFun[span_0](start_span)[span_0](end_span)
+    // Configuración exacta de Firebase del proyecto DonnyFun
     const firebaseConfig = {
       apiKey: "AIzaSyAiXfZakNFTX9Ahru3doBrwsxpSR8EP5jc",
       authDomain: "donny-fun.firebaseapp.com",
@@ -540,7 +540,8 @@
           <td class="p-2 font-bold">${p.name}</td>
           <td class="p-2 text-stone-500">${p.category}</td>
           <td class="p-2 font-bold text-amber-600">$${p.price.toFixed(2)}</td>
-          <td class="p-2 text-right">
+          <td class="p-2 text-right space-x-2">
+            <button onclick="editProduct('${p.id}')" class="text-blue-600"><i class="fas fa-edit"></i></button>
             <button onclick="deleteProduct('${p.id}')" class="text-rose-600"><i class="fas fa-trash"></i></button>
           </td>
         </tr>
@@ -548,16 +549,49 @@
       document.getElementById('prod-category').innerHTML = window.store.categories.map(c => `<option value="${c}">${c}</option>`).join('');
     }
 
-    window.openProductModal = function() { document.getElementById('product-modal').classList.remove('hidden'); };
+    window.openProductModal = function() {
+      document.getElementById('prod-modal-title').innerText = "Nuevo Producto";
+      document.getElementById('prod-id').value = "";
+      document.getElementById('prod-name').value = "";
+      document.getElementById('prod-price').value = "";
+      document.getElementById('prod-img-base64').value = "";
+      document.getElementById('product-modal').classList.remove('hidden');
+    };
+
+    window.editProduct = function(id) {
+      const p = window.store.products.find(item => item.id === id);
+      if (!p) return;
+      document.getElementById('prod-modal-title').innerText = "Editar Producto";
+      document.getElementById('prod-id').value = p.id;
+      document.getElementById('prod-name').value = p.name;
+      document.getElementById('prod-category').value = p.category;
+      document.getElementById('prod-price').value = p.price;
+      document.getElementById('prod-img-base64').value = p.img || "";
+      document.getElementById('product-modal').classList.remove('hidden');
+    };
+
     window.closeProductModal = function() { document.getElementById('product-modal').classList.add('hidden'); };
 
     window.saveProduct = function() {
+      const id = document.getElementById('prod-id').value;
       const name = document.getElementById('prod-name').value;
       const category = document.getElementById('prod-category').value;
       const price = parseFloat(document.getElementById('prod-price').value);
       const img = document.getElementById('prod-img-base64').value;
-      if (!name || isNaN(price)) return alert("Completa los campos");
-      window.store.products.push({ id: Date.now().toString(), name, category, price, img });
+      if (!name || isNaN(price)) return alert("Completa los campos correctamente");
+
+      if (id) {
+        const p = window.store.products.find(item => item.id === id);
+        if (p) {
+          p.name = name;
+          p.category = category;
+          p.price = price;
+          if (img) p.img = img;
+        }
+      } else {
+        window.store.products.push({ id: Date.now().toString(), name, category, price, img });
+      }
+
       saveDataToFirebase();
       renderProducts();
       closeProductModal();
@@ -572,43 +606,91 @@
     };
 
     window.deleteProduct = function(id) {
-      if (confirm("¿Eliminar?")) { window.store.products = window.store.products.filter(p => p.id !== id); saveDataToFirebase(); renderProducts(); }
+      if (confirm("¿Eliminar producto?")) { 
+        window.store.products = window.store.products.filter(p => p.id !== id); 
+        saveDataToFirebase(); 
+        renderProducts(); 
+      }
     };
 
     function renderCategories() {
-      document.getElementById('categories-grid').innerHTML = window.store.categories.map(c => `
+      document.getElementById('categories-grid').innerHTML = window.store.categories.map((c, idx) => `
         <div class="bg-white p-3 rounded-xl border border-stone-200 flex justify-between items-center text-xs">
           <span class="font-bold">${c}</span>
-          <button onclick="deleteCategory('${c}')" class="text-rose-600"><i class="fas fa-trash"></i></button>
+          <div class="space-x-2">
+            <button onclick="editCategory(${idx})" class="text-blue-600"><i class="fas fa-edit"></i></button>
+            <button onclick="deleteCategory('${c}')" class="text-rose-600"><i class="fas fa-trash"></i></button>
+          </div>
         </div>
       `).join('');
     }
 
     window.openCategoryModal = function() {
       const name = prompt("Nueva categoría:");
-      if (name && !window.store.categories.includes(name)) { window.store.categories.push(name); saveDataToFirebase(); renderCategories(); }
+      if (name && !window.store.categories.includes(name)) { 
+        window.store.categories.push(name); 
+        saveDataToFirebase(); 
+        renderCategories(); 
+      }
+    };
+
+    window.editCategory = function(idx) {
+      const oldName = window.store.categories[idx];
+      const newName = prompt("Editar nombre de categoría:", oldName);
+      if (newName && newName.trim() !== "" && !window.store.categories.includes(newName)) {
+        window.store.categories[idx] = newName.trim();
+        window.store.products.forEach(p => { if (p.category === oldName) p.category = newName.trim(); });
+        saveDataToFirebase();
+        renderCategories();
+        renderProducts();
+      }
     };
 
     window.deleteCategory = function(name) {
-      if (confirm(`¿Eliminar ${name}?`)) { window.store.categories = window.store.categories.filter(c => c !== name); saveDataToFirebase(); renderCategories(); }
+      if (confirm(`¿Eliminar categoría ${name}?`)) { 
+        window.store.categories = window.store.categories.filter(c => c !== name); 
+        saveDataToFirebase(); 
+        renderCategories(); 
+      }
     };
 
     function renderTables() {
-      document.getElementById('tables-grid').innerHTML = window.store.tables.map(t => `
+      document.getElementById('tables-grid').innerHTML = window.store.tables.map((t, idx) => `
         <div class="bg-white p-3 rounded-xl border border-stone-200 text-center font-bold text-xs flex flex-col justify-between items-center gap-1">
           <span>${t}</span>
-          <button onclick="deleteTable('${t}')" class="text-[10px] text-rose-500">Eliminar</button>
+          <div class="flex gap-2">
+            <button onclick="editTable(${idx})" class="text-[10px] text-blue-600">Editar</button>
+            <button onclick="deleteTable('${t}')" class="text-[10px] text-rose-500">Eliminar</button>
+          </div>
         </div>
       `).join('');
     }
 
     window.addTablePrompt = function() {
       const name = prompt("Nombre de mesa (Ej: Mesa 6):");
-      if (name && !window.store.tables.includes(name)) { window.store.tables.push(name); saveDataToFirebase(); renderTables(); }
+      if (name && !window.store.tables.includes(name)) { 
+        window.store.tables.push(name); 
+        saveDataToFirebase(); 
+        renderTables(); 
+      }
+    };
+
+    window.editTable = function(idx) {
+      const oldName = window.store.tables[idx];
+      const newName = prompt("Editar nombre de mesa:", oldName);
+      if (newName && newName.trim() !== "" && !window.store.tables.includes(newName)) {
+        window.store.tables[idx] = newName.trim();
+        saveDataToFirebase();
+        renderTables();
+      }
     };
 
     window.deleteTable = function(name) {
-      if (confirm(`¿Eliminar ${name}?`)) { window.store.tables = window.store.tables.filter(t => t !== name); saveDataToFirebase(); renderTables(); }
+      if (confirm(`¿Eliminar ${name}?`)) { 
+        window.store.tables = window.store.tables.filter(t => t !== name); 
+        saveDataToFirebase(); 
+        renderTables(); 
+      }
     };
 
     // Inicializar reloj y sincronización
