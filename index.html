@@ -14,47 +14,47 @@
 <body class="bg-amber-50 font-sans text-stone-800 antialiased selection:bg-amber-200">
   <div id="app" class="flex flex-col lg:flex-row h-screen overflow-hidden">
     
-    <!-- Barra de Navegación / Menú Lateral -->
+    <!-- Barra de Navegación / Menú Lateral y Superior Adaptable -->
     <aside class="w-full lg:w-64 bg-stone-900 text-stone-100 flex flex-row lg:flex-col justify-between shadow-xl z-20 shrink-0">
       <div class="flex lg:flex-col items-center lg:items-stretch w-full justify-between lg:justify-start">
-        <div class="p-3 lg:p-5 flex items-center gap-3 border-b-0 lg:border-b border-stone-800">
-          <div id="brand-logo-container" class="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-amber-600 flex items-center justify-center overflow-hidden shrink-0 border-2 border-amber-400">
-            <i id="brand-icon-default" class="fas fa-coffee text-white text-lg lg:text-xl"></i>
+        <div class="p-2 lg:p-5 flex items-center gap-2 lg:gap-3 border-b-0 lg:border-b border-stone-800">
+          <div id="brand-logo-container" class="w-9 h-9 lg:w-12 lg:h-12 rounded-full bg-amber-600 flex items-center justify-center overflow-hidden shrink-0 border-2 border-amber-400">
+            <i id="brand-icon-default" class="fas fa-coffee text-white text-base lg:text-xl"></i>
             <img id="brand-logo-img" class="w-full h-full object-cover hidden" alt="Logo">
           </div>
           <div class="overflow-hidden hidden sm:block">
-            <h1 id="brand-name-display" class="font-bold text-base lg:text-lg leading-tight truncate text-amber-400">Donny Fun</h1>
-            <span class="text-xs text-stone-400 block">POS Web</span>
+            <h1 id="brand-name-display" class="font-bold text-sm lg:text-lg leading-tight truncate text-amber-400">Donny Fun</h1>
+            <span class="text-[10px] text-stone-400 block">POS Web</span>
           </div>
         </div>
 
-        <nav class="flex lg:flex-col mt-0 lg:mt-4 px-2 lg:px-3 space-x-1 lg:space-x-0 lg:space-y-1 overflow-x-auto no-scrollbar items-center lg:items-stretch py-2 lg:py-0">
-          <button onclick="switchTab('pos')" id="nav-pos" class="flex lg:w-full items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white bg-stone-800 text-amber-400 whitespace-nowrap text-xs lg:text-sm">
-            <i class="fas fa-cash-register text-amber-500"></i> <span class="hidden md:inline">Tomar </span>Pedido
+        <nav class="flex lg:flex-col mt-0 px-2 lg:px-3 space-x-1 lg:space-x-0 lg:space-y-1 overflow-x-auto no-scrollbar items-center lg:items-stretch py-2 lg:py-0 w-full">
+          <button onclick="switchTab('pos')" id="nav-pos" class="flex lg:w-full items-center gap-1.5 lg:gap-3 px-2.5 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white bg-stone-800 text-amber-400 whitespace-nowrap text-[11px] lg:text-sm shrink-0">
+            <i class="fas fa-cash-register text-amber-500"></i> <span>Pedido</span>
           </button>
-          <button onclick="switchTab('kitchen')" id="nav-kitchen" class="flex lg:w-full items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-xs lg:text-sm">
-            <i class="fas fa-utensils text-amber-500"></i> Cocina
+          <button onclick="switchTab('kitchen')" id="nav-kitchen" class="flex lg:w-full items-center gap-1.5 lg:gap-3 px-2.5 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-[11px] lg:text-sm shrink-0">
+            <i class="fas fa-utensils text-amber-500"></i> <span>Cocina</span>
           </button>
-          <button onclick="switchTab('checkout')" id="nav-checkout" class="flex lg:w-full items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-xs lg:text-sm">
-            <i class="fas fa-receipt text-amber-500"></i> Caja
+          <button onclick="switchTab('checkout')" id="nav-checkout" class="flex lg:w-full items-center gap-1.5 lg:gap-3 px-2.5 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-[11px] lg:text-sm shrink-0">
+            <i class="fas fa-receipt text-amber-500"></i> <span>Caja</span>
           </button>
           
           <div class="hidden lg:block pt-4 pb-1 px-4 text-xs font-semibold text-stone-500 uppercase tracking-wider">Admin</div>
           
-          <button onclick="switchTab('products')" id="nav-products" class="flex lg:w-full items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-xs lg:text-sm">
-            <i class="fas fa-boxes text-amber-500"></i> <span class="hidden md:inline">Productos</span>
+          <button onclick="switchTab('products')" id="nav-products" class="flex lg:w-full items-center gap-1.5 lg:gap-3 px-2.5 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-[11px] lg:text-sm shrink-0">
+            <i class="fas fa-boxes text-amber-500"></i> <span>Productos</span>
           </button>
-          <button onclick="switchTab('categories')" id="nav-categories" class="flex lg:w-full items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-xs lg:text-sm">
-            <i class="fas fa-tags text-amber-500"></i> <span class="hidden md:inline">Categorías</span>
+          <button onclick="switchTab('categories')" id="nav-categories" class="flex lg:w-full items-center gap-1.5 lg:gap-3 px-2.5 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-[11px] lg:text-sm shrink-0">
+            <i class="fas fa-tags text-amber-500"></i> <span>Categorías</span>
           </button>
-          <button onclick="switchTab('tables')" id="nav-tables" class="flex lg:w-full items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-xs lg:text-sm">
-            <i class="fas fa-chair text-amber-500"></i> <span class="hidden md:inline">Mesas</span>
+          <button onclick="switchTab('tables')" id="nav-tables" class="flex lg:w-full items-center gap-1.5 lg:gap-3 px-2.5 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-[11px] lg:text-sm shrink-0">
+            <i class="fas fa-chair text-amber-500"></i> <span>Mesas</span>
           </button>
-          <button onclick="switchTab('reports')" id="nav-reports" class="flex lg:w-full items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-xs lg:text-sm">
-            <i class="fas fa-chart-bar text-amber-500"></i> <span class="hidden md:inline">Reportes</span>
+          <button onclick="switchTab('reports')" id="nav-reports" class="flex lg:w-full items-center gap-1.5 lg:gap-3 px-2.5 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-[11px] lg:text-sm shrink-0">
+            <i class="fas fa-chart-bar text-amber-500"></i> <span>Reportes</span>
           </button>
-          <button onclick="switchTab('settings')" id="nav-settings" class="flex lg:w-full items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-xs lg:text-sm">
-            <i class="fas fa-cog text-amber-500"></i> <span class="hidden md:inline">Marca</span>
+          <button onclick="switchTab('settings')" id="nav-settings" class="flex lg:w-full items-center gap-1.5 lg:gap-3 px-2.5 lg:px-4 py-2 lg:py-3 rounded-xl font-medium transition text-stone-300 hover:bg-stone-800 hover:text-white whitespace-nowrap text-[11px] lg:text-sm shrink-0">
+            <i class="fas fa-cog text-amber-500"></i> <span>Marca</span>
           </button>
         </nav>
       </div>
@@ -63,10 +63,10 @@
     <!-- Contenido Principal -->
     <main class="flex-1 bg-amber-50/50 overflow-y-auto relative flex flex-col h-[calc(100vh-4rem)] lg:h-screen">
       <header class="bg-white border-b border-stone-200 px-4 lg:px-8 py-3 lg:py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm shrink-0">
-        <h2 id="page-title" class="text-lg lg:text-2xl font-bold text-stone-800">Tomar Pedido (POS)</h2>
-        <div class="flex items-center gap-3">
-          <span id="sync-indicator" class="text-xs px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Sincronizado
+        <h2 id="page-title" class="text-base lg:text-2xl font-bold text-stone-800">Tomar Pedido (POS)</h2>
+        <div class="flex items-center gap-2 lg:gap-3">
+          <span id="sync-indicator" class="text-[10px] lg:text-xs px-2 py-0.5 lg:px-2.5 lg:py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 lg:w-2 lg:h-2 rounded-full bg-emerald-500 animate-pulse"></span> Sincronizado
           </span>
           <span id="current-time" class="text-xs lg:text-sm font-semibold text-stone-500">00:00 PM</span>
         </div>
@@ -260,7 +260,7 @@
     </div>
   </div>
 
-  <!-- Script Firebase y Lógica Sincronizada con Edición -->
+  <!-- Script Firebase y Lógica Sincronizada -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { 
